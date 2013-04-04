@@ -1,6 +1,8 @@
 Django==1.5.1
 PyYAML==3.10
 distribute==0.6.34
+mongoengine==0.7.9
 nltk==2.0.4
 numpy==1.7.0
+pymongo==2.5
 wsgiref==0.1.2
