@@ -1,22 +1,25 @@
 # Django settings for iAdler project.
-from mongoengine import register_connection
-register_connection(name="iAdler_development")
+from mongoengine import register_connection,connect
+connect("iAdler_development")
+register_connection(alias="iAdler_development",name="iAdler_development")
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
-)
+#ADMINS = (
+     #('brucewayne', 'brucewayne@iAdler.com'),
+#)
 
-MANAGERS = ADMINS
+#MANAGERS = ADMINS
+
+#DB_NAME = "iAdler"
 
 #DATABASES = {
     #'default': {
-        #'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        #'NAME': '',                      # Or path to database file if using sqlite3.
-         #The following settings are not used with sqlite3:
-        #'USER': '',
+        #'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        #'NAME': DB_NAME + '.db',                      # Or path to database file if using sqlite3.
+        # The following settings are not used with sqlite3:
+        #'USER': 'root',
         #'PASSWORD': '',
         #'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         #'PORT': '',                      # Set to empty string for default.
