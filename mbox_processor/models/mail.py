@@ -2,6 +2,9 @@ from mongoengine import *
 import datetime
 
 class Mail(EmbeddedDocument):
+    class Meta:
+        app_label = 'mbox_processor'
+
     from_user = StringField()
     from_email = StringField()
     to = ListField(StringField(),default=list)

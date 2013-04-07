@@ -3,6 +3,9 @@ from mbox_processor.models import Mail
 import datetime
 
 class MailThread(DynamicDocument):
+    class Meta:
+        app_label = 'mbox_processor'
+
     subject = StringField(max_length=200, required=True,default="No Subject Found")
     date_last_updated = DateTimeField(default=datetime.datetime.now)
     date_created = DateTimeField(default=datetime.datetime.now)

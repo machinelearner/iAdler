@@ -8,6 +8,9 @@ from time import mktime
 class Mbox:
     file_name = ""
 
+    class Meta:
+        app_label = 'mbox_processor'
+
     def __init__(self,file_name):
         self.file_name = file_name
 
