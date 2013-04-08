@@ -6,3 +6,5 @@ nltk==2.0.4
 numpy==1.7.0
 pymongo==2.5
 wsgiref==0.1.2
+django-mongorunner
+-e git://github.com/xintron/django-mongorunner.git#egg=mongorunner

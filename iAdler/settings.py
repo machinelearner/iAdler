@@ -2,7 +2,7 @@
 from mongoengine import register_connection,connect
 connect("iAdler_development")
 register_connection(alias="iAdler_development",name="iAdler_development")
-
+TEST_RUNNER = 'mongorunner.TestRunner'
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -129,6 +129,8 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'mbox_processor',
+    'mail_insights',
 )
 
 # A sample logging configuration. The only tangible logging
