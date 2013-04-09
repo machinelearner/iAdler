@@ -1,0 +1,1 @@
+from mail_insights.models.stats.mail_domain_stats import MailDomainStatsGenerator

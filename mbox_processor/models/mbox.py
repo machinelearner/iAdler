@@ -64,11 +64,13 @@ class Mbox:
     def threadify(self,mbox):
         """Threadify only looking at subject"""
         mail_thread_hash = defaultdict(list)
+        reply_or_fwd = re.compile("^(((R|r)(e|E):)|((F|f)(W|w)(d|D)*:))*")
         for mail in mbox:
-            subject = mail['Subject']
+            subject = mail.get('Subject')
             if(not subject):
+                print(mail['Message-Id'])
                 continue
-            subject = subject.lstrip("(R|r)(e|E):").strip()
+            subject = reply_or_fwd.sub("",subject).strip()
             mail_thread_hash[subject].append(mail)
         return mail_thread_hash
 

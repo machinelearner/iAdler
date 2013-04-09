@@ -1,11 +1,11 @@
 from mongoengine import *
 import math
-from collections import defaultdict
+#from collections import defaultdict
 
 class Annotation(DynamicDocument):
     WORD_TYPE = (
-            ('cue','cue words'),
-            ('ner','named entity'),
+            ('cue','cue-word'),
+            ('ne','noun'),
             )
     word = StringField()
     term_frequency = FloatField()
@@ -15,9 +15,9 @@ class Annotation(DynamicDocument):
     class Meta:
         app_label = 'mail_insights'
 
-    #def tfidf(self,number_of_documents):
-        #tfidf = (self.term_frequency/self.max_tf()) * math.log(((number_of_documents + 1)/self.document_frequency),2)
-        #return round(tfidf,4)
+    def tfidf(self,number_of_documents):
+        tfidf = (self.term_frequency/self.max_tf()) * math.log(((number_of_documents + 1)/self.document_frequency),2)
+        return round(tfidf,4)
 
     #@classmethod
     #def max_tf(self):

@@ -1,1 +1,3 @@
 from mail_insights.models.annotation import Annotation
+from mail_insights.models.text_processor import TextProcessor
+from mail_insights.models.unigram_distribution import UnigramDistribution
