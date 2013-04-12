@@ -1,7 +1,6 @@
 from mail_insights.models import Annotation,TextProcessor
 from mbox_processor.models import MailThread
 from collections import defaultdict,OrderedDict
-#from numpy import array
 
 class UnigramDistribution():
 
@@ -12,15 +11,8 @@ class UnigramDistribution():
     def increment_distribution(distribution,key):
         distribution[key] += 1
 
-    #@staticmethod
-    #def get_weight(weighted_annotation,vector_candidates):
-        #if(weighted_annotation.word in vector_candidates):
-            #return weighted_annotation.tfidf()
-        #else:
-            #return 0
-
     @staticmethod
-    def generate_tf(documents):
+    def generate_tf_of_nouns(documents):
         tf = defaultdict(int)
         for document in documents:
             tokens = TextProcessor().extract_nouns(document)
@@ -28,7 +20,7 @@ class UnigramDistribution():
         return tf
 
     @staticmethod
-    def generate_df(documents):
+    def generate_df_of_nouns(documents):
         df = defaultdict(int)
         for document in documents:
             tokens =  TextProcessor().extract_nouns(document)
@@ -37,12 +29,14 @@ class UnigramDistribution():
 
     @staticmethod
     def generate_tf_df_for_mail_threads():
-        Annotation.objects.delete()       
+        Annotation.objects.delete()
         all_mails = reduce(lambda x,y: x+y,map(lambda x: x.mails,MailThread.objects()))
-        documents = map(lambda x: x.subject + "\n" + x.body,all_mails)
-        tf = UnigramDistribution.generate_tf(documents)
-        df = UnigramDistribution.generate_df(documents)
+        documents = map(lambda x: x.body,all_mails)
+        tf = UnigramDistribution.generate_tf_of_nouns(documents)
+        df = UnigramDistribution.generate_df_of_nouns(documents)
+        print("############### Genretated TF DF")
         for token in tf.keys():
+            print("############### Saving")
             annotation = Annotation(word=token,term_frequency=tf[token],document_frequency=df[token],word_type=Annotation.WORD_TYPE[0][0])
             annotation.save()
 
@@ -55,10 +49,3 @@ class UnigramDistribution():
             max_tfidf = tfidf if max_tfidf < tfidf else max_tfidf
         return max_tfidf
 
-    #@staticmethod
-    #def generate_vector(text,corpus_tokens):
-        #Assumption: the unigram distribution of annotations is modelled into VS. Space is defined by dimension number which is in the DB record
-        #annotations = Annotation.objects.filter(word__in=corpus_tokens)
-        #tokens = TextProcessor().tokenize(text)
-        #vector_array = map(lambda annotation: UnigramDistribution.get_weight(annotation,tokens),annotations)
-        #return array(vector_array)

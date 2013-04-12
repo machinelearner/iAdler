@@ -120,12 +120,6 @@ class TextProcessor():
     def pos_tag(self,text):
         return nltk.pos_tag(text)
 
-    #def extract_ner_tree(self,text):
-        #tokens = self.no_stop_tokens(text)
-        #pos_tagged_sentence = self.pos_tag(tokens)
-        #NER_tree = nltk.ne_chunk(pos_tagged_sentence,binary=True)
-        #return NER_tree
-
     def extract_nouns(self,text):
         tokens = self.no_stop_tokens(text)
         pos_tagged_sentence = self.pos_tag(tokens)
@@ -139,8 +133,6 @@ class TextProcessor():
         tokens = []
         tokenizer = RegexpTokenizer('(\$?\d+\.\d+)|(([\w]+-)*[\w]+)')
         tokens += tokenizer.tokenize(text)
-        #stemmer = nltk.stem.snowball.EnglishStemmer()
-        #tokens = map(lambda x: stemmer.stem(x),tokens)
         return tokens
 
     def is_blank(self,text):
