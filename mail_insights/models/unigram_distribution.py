@@ -16,7 +16,14 @@ class UnigramDistribution():
         tf = defaultdict(int)
         for document in documents:
             tokens = TextProcessor().extract_nouns(document)
-            [UnigramDistribution.increment_distribution(tf,token) for token in tokens]
+            [UnigramDistribution.increment_distribution(tf,token.lower()) for token in tokens]
+        return tf
+
+    @staticmethod
+    def generate_tf_for_document(document):
+        tf = defaultdict(int)
+        tokens = TextProcessor().tokenize(document)
+        [UnigramDistribution.increment_distribution(tf,token.lower()) for token in tokens]
         return tf
 
     @staticmethod
@@ -24,7 +31,7 @@ class UnigramDistribution():
         df = defaultdict(int)
         for document in documents:
             tokens =  TextProcessor().extract_nouns(document)
-            [UnigramDistribution.increment_distribution(df,token) for token in OrderedDict.fromkeys(tokens).keys()]
+            [UnigramDistribution.increment_distribution(df,token.lower()) for token in OrderedDict.fromkeys(tokens).keys()]
         return df
 
     @staticmethod
@@ -34,10 +41,8 @@ class UnigramDistribution():
         documents = map(lambda x: x.body,all_mails)
         tf = UnigramDistribution.generate_tf_of_nouns(documents)
         df = UnigramDistribution.generate_df_of_nouns(documents)
-        print("############### Genretated TF DF")
         for token in tf.keys():
-            print("############### Saving")
-            annotation = Annotation(word=token,term_frequency=tf[token],document_frequency=df[token],word_type=Annotation.WORD_TYPE[0][0])
+            annotation = Annotation(word=token,term_frequency=tf[token],document_frequency=df[token],word_type=Annotation.WORD_TYPE[1][1])
             annotation.save()
 
     @staticmethod
@@ -48,4 +53,3 @@ class UnigramDistribution():
             tfidf = annotation.tfidf()
             max_tfidf = tfidf if max_tfidf < tfidf else max_tfidf
         return max_tfidf
-

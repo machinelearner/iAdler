@@ -23,3 +23,18 @@ class Mail(EmbeddedDocument):
             return self.from_email
         return self.from_user
 
+    @classmethod
+    def clean_body(self,body_text):
+        lines = re.compile("[\n]").split(body_text)
+        sentences_in_body = filter(lambda sentence: not self.is_part_of_trimmed_content(sentence),lines)
+        body_content = reduce(lambda line1,line2: line1+ "\n" + line2,sentences_in_body)
+        return body_content
+
+    @classmethod
+    def is_part_of_trimmed_content(self,line):
+        trim_content_regex = re.compile("^>")
+        if trim_content_regex.findall(line):
+            return True
+        return False
+
+

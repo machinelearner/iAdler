@@ -5,7 +5,7 @@ from email.utils import parseaddr,parsedate,getaddresses
 from datetime import datetime
 from time import mktime
 import re
-from mail_insights.models import JaccardCoefficient
+from mail_insights.models.jaccard_coefficient import JaccardCoefficient
 
 class Mbox:
     file_name = ""
@@ -154,6 +154,7 @@ class Mbox:
             subject = mail.get('Subject')
             message_id = mail.get('Message-Id')
             date = datetime.fromtimestamp(mktime(parsedate(mail.get('Date'))))
+            body = Mail.clean_body(body)
             mail_document = Mail(message_id=message_id,body=body,to=to_emails,from_user=from_user,from_email=from_email,cc=cc_emails,subject=subject,date=date)
             mails_in_thread.append(mail_document)
         return mails_in_thread

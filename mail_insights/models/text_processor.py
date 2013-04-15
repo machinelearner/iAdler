@@ -91,7 +91,9 @@ STOP_WORDS = ['a','able', 'about', 'above', 'abroad', 'according',
 'willing', 'wish', 'with', 'within', 'without', 'wonder', "won't",
 'would', "wouldn't", 'yes', 'yet', 'you', "you'd", "you'll", 'your',
 "you're", 'yours', 'yourself', 'yourselves', "you've",
-'zero','jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec','gmt','pst','ist','net','com','www','recipient','mon','tue','wed','thu','fri','sat','sun']
+'zero','jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec','gmt','pst','ist','net','com','www','recipient','mon','tue','wed','thu','fri','sat','sun'
+,'email','org','apache','gmail','subject','mailto','class','lib','time','error','info','text','html','plain','question','main','sender','date','day','time'
+,'attachments','attachment','bin','usr','source','util','failed','auth','root','copy','mail','lot','fine','part','blogspot','e-mail','blog','txt','var','jar','http','java','user','hadoop']
 
 class TextProcessor():
     noun_tags = ['NN','NNS','NNP','NNPS','FW']
@@ -101,11 +103,8 @@ class TextProcessor():
     def tokenize(self,text):
         tokens = []
         tokenizer = RegexpTokenizer('(\$?\d+\.\d+)|(([\w]+-)*[\w]+)')
-        #tokens += tokenizer.tokenize(self.title.lower())
         tokens += tokenizer.tokenize(text)
         tokens = filter(lambda x: x.lower() not in STOP_WORDS and len(x) >1 ,tokens)
-        #stemmer = nltk.stem.snowball.EnglishStemmer()
-        #tokens = map(lambda x: stemmer.stem(x),tokens)
         return tokens
 
     def sentence_tokenize(self,text):
@@ -125,7 +124,8 @@ class TextProcessor():
         pos_tagged_sentence = self.pos_tag(tokens)
         nouns = []
         nouns = filter(lambda token: token[1] in self.noun_tags,pos_tagged_sentence)
-        nouns = filter(lambda x: x not in STOP_WORDS and len(x) > 2 ,nouns)
+        nouns = map(lambda token: token[0],nouns)
+        nouns = filter(lambda x: x.lower() not in STOP_WORDS and len(x) > 2 ,nouns)
         return nouns
 
 

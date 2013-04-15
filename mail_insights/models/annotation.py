@@ -19,9 +19,9 @@ class Annotation(DynamicDocument):
         tfidf = (self.term_frequency/self.max_tf()) * math.log(((number_of_documents + 1)/self.document_frequency),2)
         return round(tfidf,4)
 
-    #@classmethod
-    #def max_tf(self):
-        #return self.objects.all().aggregate(Max('term_frequency'))['term_frequency__max']
+    @classmethod
+    def max_tf(self):
+        return self.objects().order_by('-term_frequency')[0].term_frequency
 
     #@classmethod
     #def get_top_10_tfidf_tokens_from_list(self,word_list):
