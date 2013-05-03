@@ -11,6 +11,8 @@ class Mail(EmbeddedDocument):
     to = ListField(StringField(),default=list)
     cc = ListField(StringField(),default=list)
     message_id = StringField(max_length=200, required=True)
+    parent_id = StringField(max_length=200, required=True)
+    is_root = BooleanField(required=True)
     date = DateTimeField(default=datetime.datetime.now)
     body = StringField()
     subject = StringField()
