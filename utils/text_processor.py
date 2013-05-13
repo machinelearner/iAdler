@@ -96,9 +96,13 @@ STOP_WORDS = ['a','able', 'about', 'above', 'abroad', 'according',
 ,'attachments','attachment','bin','usr','source','util','failed','auth','root','copy','mail','lot','fine','part','blogspot','e-mail','blog','txt','var','jar','http','java','user','hadoop']
 
 class TextProcessor():
-    noun_tags = ['NN','NNS','NNP','NNPS','FW']
-    class Meta:
-        app_label = 'mail_insights'
+    NOUN_TAGS = ['NN','NNS','NNP','NNPS','FW']
+    VERB_TAGS = ['VB','VBD','VBG','VBN','VBP','VBZ']
+    PRONOUN_TAGS = ['PRP','PRP$']
+    QUESTION_WORDS = ['what','where','which','why','when','how']
+    MODAL_WORDS = ['would','will','is','be','can','shall','should','could','are','were','do','does','did','was','may','might','must','have','am']
+    #class Meta:
+        #app_label = 'mail_insights'
 
     def tokenize(self,text):
         tokens = []
@@ -106,6 +110,8 @@ class TextProcessor():
         tokens += tokenizer.tokenize(text)
         tokens = filter(lambda x: x.lower() not in STOP_WORDS and len(x) >1 ,tokens)
         return tokens
+
+    def removeNonAscii(self,text): return "".join(filter(lambda x: ord(x)<128, text))
 
     def sentence_tokenize(self,text):
         sentences = re.compile("[\n\.?]").split(text)
@@ -116,14 +122,14 @@ class TextProcessor():
     def nltk_sentences(self,text):
         return nltk.sent_tokenize(text)
 
-    def pos_tag(self,text):
-        return nltk.pos_tag(text)
+    def pos_tag(self,tokens):
+        return nltk.pos_tag(tokens)
 
     def extract_nouns(self,text):
         tokens = self.no_stop_tokens(text)
         pos_tagged_sentence = self.pos_tag(tokens)
         nouns = []
-        nouns = filter(lambda token: token[1] in self.noun_tags,pos_tagged_sentence)
+        nouns = filter(lambda token: token[1] in self.NOUN_TAGS,pos_tagged_sentence)
         nouns = map(lambda token: token[0],nouns)
         nouns = filter(lambda x: x.lower() not in STOP_WORDS and len(x) > 2 ,nouns)
         return nouns
@@ -142,4 +148,82 @@ class TextProcessor():
     def extract_mail_domain(self,mail_id):
         domain_name = mail_id.split('@')[-1]
         return domain_name
+
+    def contains_5wh1(self,sentence):
+        tokens = map(lambda x:x.lower(),self.no_stop_tokens(sentence))
+        number_of_5wh1_words = len(set(tokens) & set(self.QUESTION_WORDS))
+        if number_of_5wh1_words > 0:
+            return 1
+        return 0
+
+    def starts_with_5wh1(self,sentence):
+        tokens = map(lambda x:x.lower(),self.no_stop_tokens(sentence))
+        if tokens[0] in self.QUESTION_WORDS:
+            return 1
+        return 0
+
+    def ends_with_5wh1(self,sentence):
+        tokens = map(lambda x:x.lower(),self.no_stop_tokens(sentence))
+        if tokens[-1] in self.QUESTION_WORDS:
+            return 1
+        return 0
+
+    #TO-DO change this to use POS tagging or atleast re-vist
+    def starts_with_modal(self,sentence):
+        tokens = map(lambda x:x.lower(),self.no_stop_tokens(sentence))
+        if tokens[0] in self.MODAL_WORDS:
+            return 1
+        return 0
+
+    def distance_from_beginning_5wh1(self,sentence):
+        tokens = map(lambda x:x.lower(),self.no_stop_tokens(sentence))
+        index_of_5wh1 = self.index_of_5wh1(tokens)
+        if index_of_5wh1 == -1:
+            return 0
+        weight_of_5wh1 = 1 - (index_of_5wh1 + 1)/float(len(tokens))
+        return weight_of_5wh1
+
+    def distance_from_end_5wh1(self,sentence):
+        tokens = map(lambda x:x.lower(),self.no_stop_tokens(sentence))
+        index_of_5wh1 = self.index_of_5wh1(tokens)
+        if index_of_5wh1 == -1:
+            return 0
+        weight_of_5wh1 = 1 - (len(tokens) - index_of_5wh1 - 1)/float(len(tokens))
+        return weight_of_5wh1
+
+
+    def verb_exists_after_5wh1(self,sentence):
+        tokens = map(lambda x:x.lower(),self.no_stop_tokens(sentence))
+        index_of_5wh1 = self.index_of_5wh1(tokens)
+        if index_of_5wh1 < -1 or index_of_5wh1 == len(tokens)-1:
+            return 0
+        tagged_tokens = self.pos_tag(tokens)
+        if tagged_tokens[index_of_5wh1 + 1][1] in self.VERB_TAGS:
+            return 1
+        return -1
+
+    def noun_or_pronoun_exists_after_5wh1(self,sentence):
+        tokens = map(lambda x:x.lower(),self.no_stop_tokens(sentence))
+        index_of_5wh1 = self.index_of_5wh1(tokens)
+        if index_of_5wh1 < -1 or index_of_5wh1 == len(tokens)-1:
+            return 0
+        tagged_tokens = self.pos_tag(tokens)
+        if tagged_tokens[index_of_5wh1 + 1][1] in self.NOUN_TAGS + self.PRONOUN_TAGS:
+            return 1
+        return -1
+
+
+    def index_of_5wh1(self,tokens):
+        for index,token in enumerate(tokens):
+            if token in self.QUESTION_WORDS:
+                return index
+        return -1
+
+    def extract_simple_question_phrase(self,sentence):
+        compound_sentence_delimiters = [',',';','then','but','and','or']
+        regex_string = "(?i)("+ "|".join(compound_sentence_delimiters) + ")"
+        compound_delimiters = re.compile(regex_string)
+        simple_sentences = compound_delimiters.split(sentence)
+        simple_sentences = filter(lambda sent: sent.lower() not in compound_sentence_delimiters,simple_sentences)
+
 

@@ -1,20 +1,21 @@
-from mail_insights.models import Annotation,TextProcessor,UnigramDistribution
+from learning_engine.models import Annotation
+from utils import TextProcessor,UnigramDistribution
 from collections import defaultdict
 import math
 
 class TagGenerator:
     class Meta:
-        app_label = 'mail_insights'
+        app_label = 'learning_engine'
 
     @classmethod
-    def generate_using_tfidf(self,document,number_of_documents,TagClass=Annotation):
+    def generate_using_TFIDF(self,document,number_of_documents,TagClass=Annotation):
         text_processor = TextProcessor()
         tokens = text_processor.tokenize(document)
         annotations = TagClass.objects(word__in=tokens)
         tfidf_hash = defaultdict(float)
         map(lambda annotation: tfidf_hash.update({annotation.word:annotation.tfidf(number_of_documents)}),annotations)
         sorted_tag_tuples = map(lambda key: (key,tfidf_hash[key]), sorted(tfidf_hash,key=tfidf_hash.get,reverse=True))
-        return sorted_tag_tuples[:5]
+        return sorted_tag_tuples[:10]
 
     @classmethod
     def generate_using_ICA(self,document_to_tag,documents_in_corpus,TagClass=Annotation):

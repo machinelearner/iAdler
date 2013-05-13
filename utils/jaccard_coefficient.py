@@ -1,9 +1,6 @@
-from mail_insights.models import TextProcessor
+from utils import TextProcessor
 
 class JaccardCoefficient():
-
-    class Meta:
-        app_label = 'mail_insights'
 
     @staticmethod
     def calculate(sentence1,sentence2):
