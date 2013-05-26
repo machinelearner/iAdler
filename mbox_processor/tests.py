@@ -24,3 +24,5 @@ class MboxImportTest(TestCase):
         Mbox(self.data_folder + "201303.mbox").threadify_using_jwz_and_save()
         Mbox(self.data_folder + "201304.mbox").threadify_using_jwz_and_save()
 
+    def testShouldParseAndImportFULLMboxFile(self):
+        Mbox(self.data_folder + "hadoop_all_mails/aug-april.mbox").threadify_using_jwz_and_save()

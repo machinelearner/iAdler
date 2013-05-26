@@ -1,5 +1,6 @@
 import nltk
 from nltk.tokenize.regexp import RegexpTokenizer
+from nltk.stem import WordNetLemmatizer
 import re
 
 STOP_WORDS = ['a','able', 'about', 'above', 'abroad', 'according',
@@ -93,7 +94,9 @@ STOP_WORDS = ['a','able', 'about', 'above', 'abroad', 'according',
 "you're", 'yours', 'yourself', 'yourselves', "you've",
 'zero','jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec','gmt','pst','ist','net','com','www','recipient','mon','tue','wed','thu','fri','sat','sun'
 ,'email','org','apache','gmail','subject','mailto','class','lib','time','error','info','text','html','plain','question','main','sender','date','day','time'
-,'attachments','attachment','bin','usr','source','util','failed','auth','root','copy','mail','lot','fine','part','blogspot','e-mail','blog','txt','var','jar','http','java','user','hadoop']
+,'attachments','attachment','bin','usr','source','util','failed','auth','root','copy','mail','lot','fine','part','blogspot','e-mail','blog','txt','var','jar','http','java','user','hadoop',
+'monday','tuesday','wednesday','thursday','friday','saturday','sunday',
+'january','febraury','march','april','may','june','july','august','september','october','november','december']
 
 class TextProcessor():
     NOUN_TAGS = ['NN','NNS','NNP','NNPS','FW']
@@ -106,9 +109,11 @@ class TextProcessor():
 
     def tokenize(self,text):
         tokens = []
+        wordnet_lemmatizer = WordNetLemmatizer()
         tokenizer = RegexpTokenizer('(\$?\d+\.\d+)|(([\w]+-)*[\w]+)')
         tokens += tokenizer.tokenize(text)
         tokens = filter(lambda x: x.lower() not in STOP_WORDS and len(x) >1 ,tokens)
+        tokens = map(lambda token: wordnet_lemmatizer.lemmatize(token), tokens)
         return tokens
 
     def removeNonAscii(self,text): return "".join(filter(lambda x: ord(x)<128, text))
@@ -127,11 +132,13 @@ class TextProcessor():
 
     def extract_nouns(self,text):
         tokens = self.no_stop_tokens(text)
+        wordnet_lemmatizer = WordNetLemmatizer()
         pos_tagged_sentence = self.pos_tag(tokens)
         nouns = []
         nouns = filter(lambda token: token[1] in self.NOUN_TAGS,pos_tagged_sentence)
         nouns = map(lambda token: token[0],nouns)
         nouns = filter(lambda x: x.lower() not in STOP_WORDS and len(x) > 2 ,nouns)
+        nouns = map(lambda token: wordnet_lemmatizer.lemmatize(token), nouns)
         return nouns
 
 

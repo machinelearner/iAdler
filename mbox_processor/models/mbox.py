@@ -1,10 +1,12 @@
-from mbox_processor.models import Mail,MailThread
+from mbox_processor.models import Mail, MailThread, User
 from collections import defaultdict
 import mailbox
-from email.utils import parseaddr,parsedate,getaddresses
+from email.utils import parseaddr, parsedate, getaddresses
 from datetime import datetime
 from time import mktime
 from jwzthreading import *
+import re
+
 
 class Mbox:
     file_name = ""
@@ -27,10 +29,11 @@ class Mbox:
     def create_thread(self,thread_id,thread_container):
         subject = thread_id
         thread_info = self.get_thread_info(thread_container)
-        created_by = thread_info['created_by']
+        creator_email = thread_info['creator_email']
+        creator_name = thread_info['creator_name']
         date_created = thread_info['created_date']
         mails_in_thread = self.mails_from_container(thread_container,is_root=True)
-        MailThread.create_or_update(thread_id,subject,mails_in_thread,created_by,date_created)
+        MailThread.create_or_update(thread_id,subject,mails_in_thread,creator_email,creator_name,date_created)
 
     def mails_from_container(self,container,is_root=False):
         mails = []
@@ -86,7 +89,12 @@ class Mbox:
         message_id = mail.get('Message-Id')
         date = datetime.fromtimestamp(mktime(parsedate(mail.get('Date'))))
         body = Mail.clean_body(body)
-        mail_document = Mail(message_id=message_id,body=body,to=to_emails,from_user=from_user,from_email=from_email,cc=cc_emails,subject=subject,date=date)
+        from_user = self.get_user_name(from_user,from_email)
+        sender ,creation_status = User.objects.get_or_create(email=from_email,auto_save=False)
+        if creation_status:
+            sender.name = from_user
+            sender.save()
+        mail_document = Mail(message_id=message_id,body=body,to=to_emails,sender=sender,cc=cc_emails,subject=subject,date=date)
         return mail_document
 
 
@@ -97,9 +105,18 @@ class Mbox:
         else:
             thread_start = thread_container.children[0].message.message
 
-        thread_info['created_by'] = parseaddr(thread_start.get('From'))[-1]
+        thread_info['creator_email'] = parseaddr(thread_start.get('From'))[-1]
+        thread_info['creator_name'] = parseaddr(thread_start.get('From'))[0]
         thread_info['created_date'] = datetime.fromtimestamp(mktime(parsedate(thread_start.get('Date'))))
         return thread_info
+
+    def get_user_name(self,from_user,from_email):
+        if not from_user.strip():
+            return from_email
+        special_char_regex = re.compile("[\!=\?\\\]|(utf)",re.IGNORECASE)
+        if special_char_regex.findall(from_user,):
+            return from_email
+        return from_user
 
     def get_parent_mail_id(self,container,is_root):
         if is_root:

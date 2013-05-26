@@ -21,8 +21,9 @@ class UnigramDistribution():
     @staticmethod
     def generate_tf_for_document(document):
         tf = defaultdict(int)
-        tokens = TextProcessor().tokenize(document)
+        tokens = TextProcessor().extract_nouns(document)
         [UnigramDistribution.increment_distribution(tf,token.lower()) for token in tokens]
+        print tf
         return tf
 
     @staticmethod

@@ -17,23 +17,21 @@ class NBClassifier():
             term_frequency_per_class[label] = UnigramDistribution.generate_tf_of_nouns(self.labelled_training_set[label])
         self.create_class_labels(self.classes)
         self.create_classwise_unigram_probabilities(term_frequency_per_class)
-            
+
     @classmethod
     def classify(self,text):
         tokens = map(lambda x: TextProcessor().removeNonAscii(x).lower(),TextProcessor().tokenize(text))
+        return self.classify_tokens(tokens)
+
+    @classmethod
+    def classify_tokens(self,tokens):
         unigrams = Unigram.objects(word__in=tokens)
         all_classes =  ClassLabel.objects.distinct("name")
-        #belongingness_probability = dict((label,0) for label in Unigram.objects.distinct('label'))
-        #for label in unigrams:
-            #belongingness_probability[label] = self.probability_union(map(lambda x: x.probability,unigrams))
-        #classified_label = max(belongingness_probability,key=belongingness_probability.get)
-        #return classified_label
         belongingness_probability = dict((a_class,0) for a_class in all_classes)
         for a_class in all_classes:
-            list_of_probabilities = []
+            list_of_probabilities = [1]
             for unigram in unigrams:
                 list_of_probabilities.append(unigram.get_probability_for_label(a_class))
-#            belongingness_probability[a_class] = self.probability_union(list_of_probabilities)
             belongingness_probability[a_class] = self.log_values(list_of_probabilities)
         classified_label = max(belongingness_probability,key=belongingness_probability.get)
         return classified_label, belongingness_probability[classified_label]
@@ -48,9 +46,9 @@ class NBClassifier():
         union = reduce(lambda x,y:x+y,map(lambda x: math.log10(x),list_of_probabilities))
         return union
 
-
     def create_classwise_unigram_probabilities(self,term_frequency_per_class):
         all_tokens = reduce(lambda x,y: x+y, map(lambda tf_hash: tf_hash.keys(),term_frequency_per_class.values()))
+        all_tokens = self.unique_tokens(all_tokens)
         denominator_per_class_with_smoothing = self.extract_denominator_from_term_freq_hash(term_frequency_per_class)
         all_classes = term_frequency_per_class.keys()
         for token in all_tokens:
@@ -72,9 +70,5 @@ class NBClassifier():
         for a_class in classes:
             ClassLabel(name=a_class).save()
 
-from mongoengine import register_connection,connect
-connect("iAdler_development")
-register_connection(alias="iAdler_development",name="iAdler_development")
-
-begin = open("/Users/Admin/TW/iAdler/data/domain_difficulty/advanced.txt")
-NBClassifier.classify(begin.read())
+    def unique_tokens(self,tokens):
+        return list(set(tokens))

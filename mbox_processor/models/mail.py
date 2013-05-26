@@ -1,4 +1,5 @@
 from mongoengine import *
+from mbox_processor.models import User
 import datetime
 import re
 
@@ -6,8 +7,7 @@ class Mail(EmbeddedDocument):
     class Meta:
         app_label = 'mbox_processor'
 
-    from_user = StringField()
-    from_email = StringField()
+    sender = ReferenceField(User,required=True)
     to = ListField(StringField(),default=list)
     cc = ListField(StringField(),default=list)
     message_id = StringField(max_length=200, required=True)
@@ -17,13 +17,6 @@ class Mail(EmbeddedDocument):
     body = StringField()
     subject = StringField()
 
-    def extract_user_name(self):
-        if not self.from_user.strip():
-            return self.from_email
-        special_char_regex = re.compile("[\!=\?\\\]|(utf)",re.IGNORECASE)
-        if special_char_regex.findall(self.from_user,):
-            return self.from_email
-        return self.from_user
 
     @classmethod
     def clean_body(self,body_text):
@@ -35,8 +28,13 @@ class Mail(EmbeddedDocument):
     @classmethod
     def is_part_of_trimmed_content(self,line):
         trim_content_regex = re.compile("^>")
+        mail_id_regex = re.compile("[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})")
         if trim_content_regex.findall(line):
             return True
+
+        if mail_id_regex.findall(line):
+            return True
+
         return False
 
 
