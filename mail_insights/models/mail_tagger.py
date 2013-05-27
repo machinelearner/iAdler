@@ -22,7 +22,7 @@ class MailTagger():
 
     @classmethod
     def tag_mail_thread_for_difficulty_level_using_ICA_tags(self):
-        mail_threads = MailThread.objects.only("tags_ICA_in_domain_difficulty")
+        mail_threads = MailThread.objects
         for thread in mail_threads:
             classified_label = NBClassifier.classify_tokens(thread.tags_ICA_in_domain_difficulty)
             thread.difficulty_level_ICA = classified_label[0]
@@ -31,7 +31,7 @@ class MailTagger():
 
     @classmethod
     def tag_mail_thread_for_difficulty_level_using_TFIDF_tags(self):
-        mail_threads = MailThread.objects.only("tags_TFIDF_in_domain_difficulty")
+        mail_threads = MailThread.objects
         for thread in mail_threads:
             classified_label = NBClassifier.classify_tokens(thread.tags_TFIDF_in_domain_difficulty)
             thread.difficulty_level_TFIDF = classified_label[0]
@@ -51,15 +51,4 @@ class MailTagger():
             thread.tags_TFIDF = tags_for_thread
             thread.tags_TFIDF_in_domain_difficulty  = difficulty_tags
             thread.save()
-
-
-
-#from mongoengine import register_connection,connect
-#connect("iAdler_development")
-#register_connection(alias="iAdler_development",name="iAdler_development")
-#
-#MailTagger.tag_mail_thread_by_concepts()
-
-
-
 

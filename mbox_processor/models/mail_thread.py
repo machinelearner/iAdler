@@ -16,7 +16,20 @@ class MailThread(DynamicDocument):
     thread_id = StringField()
     term_frequencies = DictField()
     tags_ICA_in_domain_difficulty = ListField(StringField(default=["Miscellaneous","Unrelated"]))
+    tags_TFIDF_in_domain_difficulty = ListField(StringField(default=["Miscellaneous","Unrelated"]))
     """thread-id is the message-id of the first message which started the thread"""
+
+    def users_in_thread(self):
+        list_of_users = [self.creator]
+        responders = map(lambda mail: mail.sender, self.mails)
+        list_of_users += responders
+        users_in_thread = User.uniq(list_of_users)
+        return users_in_thread
+
+    def is_associated_user(self,user):
+        if user in self.users_in_thread():
+            return True
+        return False
 
     @classmethod
     def create_or_update(self,thread_id,subject,mails,creator_email,creator_name,date_created):
@@ -67,4 +80,5 @@ class MailThread(DynamicDocument):
     @classmethod
     def update_freq(self, all_term_frequencies, thread):
         all_term_frequencies[thread.subject] = thread.term_frequencies
+
 

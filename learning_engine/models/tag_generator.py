@@ -25,7 +25,6 @@ class TagGenerator:
     @classmethod
     def generate_using_ICA(self,document_to_tag,documents_in_corpus,TagClass=Annotation):
         text_processor = TextProcessor()
-#        tokens = text_processor.tokenize(document_to_tag)
         tokens = text_processor.extract_nouns(document_to_tag)
         tf_for_given_document = UnigramDistribution.generate_tf_for_document(document_to_tag)
         tf_across_documents = map(lambda document: UnigramDistribution.generate_tf_for_document(document),documents_in_corpus)
